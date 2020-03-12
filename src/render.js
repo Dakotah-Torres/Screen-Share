@@ -57,4 +57,30 @@ async function selectSource( source) {
     const options = { mimeType: 'video/webm; codecs=vp9'}
     mediaRecorder = new MediaRecorder( stream, options); 
 
+    mediaRecorder.ondataavaliable = handleDataAvaliable;
+    mediaRecorder.onstop = handleStop; 
+
+}
+
+
+function handleDataAvaliable(e) {
+    console.log("data is avaliable")
+    recordedChunks.push(e.data)
+}
+
+const { writeFile } = require('fs');
+//save file on stop
+async function handleStop(e) {
+    const blob = new Blob(recordedChunks,{
+        type: 'video/webm; codecs=vp9'
+    });
+
+    const buffer = new Buffer.from(await blob.arraryBuffer())
+
+    const {filePath} = await dialog.showSaveDialog({
+        buttonLabel: 'Save Video',
+        defaultPath: `vid-${Date.now()}.webm`
+    });
+
+    writeFile(filePath,buffer)
 }
